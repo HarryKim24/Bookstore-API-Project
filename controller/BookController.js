@@ -2,7 +2,18 @@ const conn = require('../mariadb');
 const {StatusCodes} = require('http-status-codes');
 
 const viewAllBooks = (req, res) => {
-  res.json('전체 도서 조회');
+  let sql = 'SELECT * FROM books';
+
+  conn.query(sql,
+    (err, results) => {
+      if (err) {
+        console.log(err);
+        return res.status(StatusCodes.BAD_REQUEST).end();
+      }
+
+      return res.status(StatusCodes.OK).json(results);
+    }
+  );
 }
 
 const viewIndividualBook = (req, res) => {
