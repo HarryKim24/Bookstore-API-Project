@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { viewAllBooks, viewIndividualBook, viewBooksByCategory } = require('../controller/BookController');
+const { viewAllBooks, viewIndividualBook } = require('../controller/BookController');
 
 router.use(express.json());
 
