@@ -2,22 +2,25 @@ const conn = require('../mariadb');
 const {StatusCodes} = require('http-status-codes');
 
 const viewAllBooks = (req, res) => {
-  let {category_id, new_books} = req.query;
+  let {category_id, new_books, limit, current_page} = req.query;
+  let offset = limit * (current_page - 1);
 
-  
-  let sql = 'SELECT * FROM books ';
+  let sql = 'SELECT * FROM books';
   let values = [];
+
   if (category_id && new_books) {
-    sql += `WHERE category_id=?
+    sql += ` WHERE category_id=?
             AND pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()`;
-    values = [category_id, new_books];
+    values = [category_id];
   } else if (category_id) {
-    sql += 'WHERE category_id=?';
+    sql += ' WHERE category_id=?';
     values = [category_id];
   } else if (new_books) {
-    sql += 'WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()';
-    values = [new_books];
+    sql += ' WHERE pub_date BETWEEN DATE_SUB(NOW(), INTERVAL 1 MONTH) AND NOW()';
   }
+
+  sql += ' LIMIT ? OFFSET ?';
+  values.push(parseInt(limit), offset);
 
   conn.query(sql, values,
     (err, results) => {
