@@ -40,7 +40,20 @@ const viewCartItems = (req, res) => {
 }
 
 const removeCartItem = (req, res) => {
-  res.json('장바구니 도서 삭제');
+  const {id} = req.params;
+
+  let sql = 'DELETE FROM cartItems WHERE id = ?';
+
+  conn.query(sql, id,
+    (err, results) => {
+      if (err) {
+        console.log(err);
+        return res.status(StatusCodes.BAD_REQUEST).end();
+      }
+
+      return res.status(StatusCodes.OK).json(results);
+    }
+  );
 }
 
 module.exports = {
