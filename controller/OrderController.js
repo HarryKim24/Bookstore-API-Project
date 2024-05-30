@@ -63,8 +63,24 @@ const viewOrders = async (req, res) => {
   return res.status(StatusCodes.OK).json(rows);
 }
 
-const viewOrderDetail = (req, res) => {
-  res.json('주문 상세 조회');
+const viewOrderDetail = async (req, res) => {
+  const {id} = req.params;
+
+  const conn = await mysql.createConnection({
+    host : 'localhost',
+    user : 'root',
+    password : 'root',
+    database : 'Bookstore',
+    dateStrings : true
+  });
+
+  let sql = `SELECT book_id, title, author, price, count
+              FROM orderedBook LEFT JOIN books
+              ON orderedBook.book_id=books.id
+              WHERE order_id=?`;
+
+  let [rows, fields] = await conn.query(sql,[id]);
+  return res.status(StatusCodes.OK).json(rows);
 }
 
 module.exports = {
