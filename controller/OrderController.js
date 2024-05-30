@@ -1,8 +1,6 @@
 const mysql = require('mysql2/promise');
 const {StatusCodes} = require('http-status-codes');
 
-
-
 const order = async (req, res) => {
   const conn = await mysql.createConnection({
     host : 'localhost',
@@ -25,23 +23,25 @@ const order = async (req, res) => {
   [results] = await conn.execute(sql, values);
   let order_id = results.insertId;
 
+  sql = `SELECT book_id, count FROM cartItems WHERE id IN (?)`;
+  let [orderItems, fields] = await conn.query(sql, [items]);
+
   sql = `INSERT INTO orderedBook (order_id, book_id, count) VALUES ?`
   values = [];
-  items.forEach((item) => {
+  orderItems.forEach((item) => {
     values.push([order_id, item.book_id, item.count]);
   })
   results = await conn.query(sql, [values]);
 
-  let result = await deleteCartItems(conn);
+  let result = await deleteCartItems(conn, items);
 
   return res.status(StatusCodes.OK).json(result);
 }
 
-const deleteCartItems = async (conn) => {
+const deleteCartItems = async (conn, items) => {
   let sql = `DELETE FROM cartItems WHERE id IN (?)`;
-  let values = [3, 4];
 
-  let result = await conn.query(sql, [values]);
+  let result = await conn.query(sql, [items]);
   return result;
 }
 
