@@ -45,8 +45,8 @@ const deleteCartItems = async (conn, items) => {
   return result;
 }
 
-const viewOrders = (req, res) => {
-  res.json('주문 목록 조회');
+const viewOrders = async (req, res) => {
+
 }
 
 const viewOrderDetail = (req, res) => {
