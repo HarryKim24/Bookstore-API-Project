@@ -46,7 +46,21 @@ const deleteCartItems = async (conn, items) => {
 }
 
 const viewOrders = async (req, res) => {
+  const conn = await mysql.createConnection({
+    host : 'localhost',
+    user : 'root',
+    password : 'root',
+    database : 'Bookstore',
+    dateStrings : true
+  });
 
+  let sql = `SELECT orders.id, created_at, address, receiver, contact, 
+              book_title ,total_count, total_price
+              FROM orders LEFT JOIN delivery
+              ON orders.delivery_id=delivery.id;`;
+
+  let [rows, fields] = await conn.query(sql);
+  return res.status(StatusCodes.OK).json(rows);
 }
 
 const viewOrderDetail = (req, res) => {
