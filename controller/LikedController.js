@@ -30,10 +30,15 @@ const addLikes = (req, res) => {
 
 const deleteLikes = (req, res) => {
   const {id} = req.params;
-  const {user_id} = req.body;
+
+  let receiveJwt = req.headers["authorization"];
+  console.log(receiveJwt);
+
+  let decodedJwt = jwt.verify(receiveJwt, process.env.PRIVATE_KEY);
+  console.log(decodedJwt);
 
   let sql = 'DELETE FROM likes WHERE user_id = ? AND liked_book_id = ?';
-  let values = [user_id, id];
+  let values = [decodedJwt.id, id];
 
   conn.query(sql, values,
     (err, results) => {
