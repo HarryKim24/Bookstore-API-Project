@@ -1,11 +1,16 @@
+const jwt = require('jsonwebtoken');
 const conn = require('../mariadb');
 const {StatusCodes} = require('http-status-codes');
+const dotenv = require('dotenv');
+dotenv.config();
 
 const addCartItem = (req, res) => {
-  const {user_id, book_id, count} = req.body;
+  const {book_id, count} = req.body;
+
+  let authorization = authorizationJwt(req);
 
   let sql = 'INSERT INTO cartItems (user_id, book_id, count) VALUES (?, ?, ?);';
-  let values = [user_id, book_id, count];
+  let values = [authorization.id, book_id, count];
 
   conn.query(sql, values,
     (err, results) => {
@@ -20,13 +25,15 @@ const addCartItem = (req, res) => {
 }
 
 const viewCartItems = (req, res) => {
-  const {user_id, selected} = req.body;
+  const {selected} = req.body;
+
+  let authorization = authorizationJwt(req);
 
   let sql = `SELECT cartItems.id, book_id, title, summary, count, price 
             FROM cartItems LEFT JOIN books 
             ON cartItems.book_id = books.id
             WHERE user_id=? AND cartItems.id IN (?)`;
-  let values = [user_id, selected];
+  let values = [authorization.id, selected];
 
   conn.query(sql, values,
     (err, results) => {
@@ -41,11 +48,11 @@ const viewCartItems = (req, res) => {
 }
 
 const removeCartItem = (req, res) => {
-  const {id} = req.params;
+  const cartItem_id = req.params.id;
 
   let sql = 'DELETE FROM cartItems WHERE id = ?';
 
-  conn.query(sql, id,
+  conn.query(sql, cartItem_id,
     (err, results) => {
       if (err) {
         console.log(err);
@@ -55,6 +62,16 @@ const removeCartItem = (req, res) => {
       return res.status(StatusCodes.OK).json(results);
     }
   );
+}
+
+function authorizationJwt (req) {
+  let receiveJwt = req.headers["authorization"];
+  console.log(receiveJwt);
+
+  let decodedJwt = jwt.verify(receiveJwt, process.env.PRIVATE_KEY);
+  console.log(decodedJwt);
+
+  return decodedJwt;
 }
 
 module.exports = {
