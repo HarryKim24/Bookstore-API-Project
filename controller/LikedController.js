@@ -5,16 +5,12 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const addLikes = (req, res) => {
-  const {id} = req.params;
+  const book_id = req.params.id;
 
-  let receiveJwt = req.headers["authorization"];
-  console.log(receiveJwt);
-
-  let decodedJwt = jwt.verify(receiveJwt, process.env.PRIVATE_KEY);
-  console.log(decodedJwt);
+  let authorization = authorizationJwt(req);
 
   let sql = 'INSERT INTO likes (user_id, liked_book_id) VALUES (?, ?)';
-  let values = [decodedJwt.id, id];
+  let values = [authorization.id, book_id];
 
   conn.query(sql, values,
     (err, results) => {
@@ -29,16 +25,12 @@ const addLikes = (req, res) => {
 }
 
 const deleteLikes = (req, res) => {
-  const {id} = req.params;
+  const book_id = req.params.id;
 
-  let receiveJwt = req.headers["authorization"];
-  console.log(receiveJwt);
-
-  let decodedJwt = jwt.verify(receiveJwt, process.env.PRIVATE_KEY);
-  console.log(decodedJwt);
+  let authorization = authorizationJwt(req);
 
   let sql = 'DELETE FROM likes WHERE user_id = ? AND liked_book_id = ?';
-  let values = [decodedJwt.id, id];
+  let values = [authorization.id, book_id];
 
   conn.query(sql, values,
     (err, results) => {
@@ -50,6 +42,16 @@ const deleteLikes = (req, res) => {
       return res.status(StatusCodes.OK).json(results);
     }
   );
+}
+
+function authorizationJwt (req) {
+  let receiveJwt = req.headers["authorization"];
+  console.log(receiveJwt);
+
+  let decodedJwt = jwt.verify(receiveJwt, process.env.PRIVATE_KEY);
+  console.log(decodedJwt);
+
+  return decodedJwt;
 }
 
 module.exports = {
