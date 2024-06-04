@@ -61,7 +61,6 @@ const deleteLikes = (req, res) => {
       }
     );
   }
-
 }
 
 module.exports = {

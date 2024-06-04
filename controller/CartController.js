@@ -72,20 +72,33 @@ const viewCartItems = (req, res) => {
 }
 
 const removeCartItem = (req, res) => {
-  const cartItem_id = req.params.id;
 
-  let sql = 'DELETE FROM cartItems WHERE id = ?';
+  let authorization = authorizationJwt(req, res);
 
-  conn.query(sql, cartItem_id,
-    (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.status(StatusCodes.BAD_REQUEST).end();
+  if (authorization instanceof jwt.TokenExpiredError) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      "message" : "로그인 세션이 만료되었습니다. 다시 로그인 하시오."
+    });
+  } else if (authorization instanceof jwt.JsonWebTokenError) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      "message" : "잘못된 토큰입니다."
+    });
+  } else {
+    const cartItem_id = req.params.id;
+
+    let sql = 'DELETE FROM cartItems WHERE id = ?';
+  
+    conn.query(sql, cartItem_id,
+      (err, results) => {
+        if (err) {
+          console.log(err);
+          return res.status(StatusCodes.BAD_REQUEST).end();
+        }
+  
+        return res.status(StatusCodes.OK).json(results);
       }
-
-      return res.status(StatusCodes.OK).json(results);
-    }
-  );
+    );
+  }
 }
 
 module.exports = {
